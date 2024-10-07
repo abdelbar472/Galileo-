@@ -8,6 +8,19 @@ from .serializers import  *
 # Create your views here.
 
 class BlogPostListCreate(generics.ListCreateAPIView):
-    queryset = BlogPost.objects.all()
     serializer_class = BlogPostSerializer
+
+    def get_queryset(self):
+        # Fetch all blog posts using Cassandra's querying system
+        # Cassandra may not support .all() in the same way as Django ORM.
+        return BlogPost.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
 
